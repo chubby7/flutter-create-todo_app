@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:todoapp/task.dart';
 import 'constants.dart';
+import 'taskList.dart';
+import 'package:intl/intl.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({super.key});
@@ -10,6 +13,7 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
+  DateTime today = DateTime.now();
   TextEditingController taskController = TextEditingController();
 
   @override
@@ -17,6 +21,8 @@ class _InputPageState extends State<InputPage> {
     super.dispose();
     taskController.dispose();
   }
+
+  List<Task> tasks = [];
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +77,7 @@ class _InputPageState extends State<InputPage> {
                         ),
                       ],
                     ),
-                    Text('June 10, 2026', style: kNormalTextStyle),
+                    Text(DateFormat('EEEE, d MMMM y').format(DateTime.now()), style: kNormalTextStyle),
                   ],
                 ),
               ),
@@ -98,8 +104,10 @@ class _InputPageState extends State<InputPage> {
                   IconButton(
                     icon: Icon(Icons.add_circle, size: 50),
                     onPressed: () {
-                      print(taskController.text);
-                      taskController.clear();
+                      setState(() {
+                        tasks.add(Task(title: taskController.text));
+                        taskController.clear();
+                      });
                     },
                   ),
                 ],
@@ -112,10 +120,12 @@ class _InputPageState extends State<InputPage> {
               ),
               child: Text('Tasks', style: kNormalTextStyle),
             ),
-            TasksList(title: 'buy fertilizer'),
-            TasksList(title: 'plant okra'),
-            TasksList(title: 'sell beans'),
-            TasksList(title: 'rent tractor'),
+            Expanded(child: ListView.builder(
+                itemCount: tasks.length,
+                itemBuilder: (context, index){
+                  return  TasksList(title: tasks[index].title,
+                  isChecked: tasks[index].isDone);
+                })),
           ],
         ),
       ),
@@ -123,23 +133,4 @@ class _InputPageState extends State<InputPage> {
   }
 }
 
-class TasksList extends StatelessWidget {
-  TasksList({required this.title});
-  String title;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade900,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: ListTile(
-        leading: Checkbox(value: false, onChanged: (value) {}),
-        title: Text(title, style: TextStyle(color: Colors.white)),
-        trailing: Icon(Icons.delete, color: Colors.red),
-      ),
-    );
-  }
-}

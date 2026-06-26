@@ -8,7 +8,7 @@ void main() {
 class TodoApp extends StatelessWidget {
   const TodoApp({super.key});
 
-  @overrideg
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark(),
