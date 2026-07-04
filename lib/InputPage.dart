@@ -4,9 +4,11 @@ import 'package:todoapp/task.dart';
 import 'constants.dart';
 import 'taskList.dart';
 import 'package:intl/intl.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class InputPage extends StatefulWidget {
   const InputPage({super.key});
+
 
   @override
   State<InputPage> createState() => _InputPageState();
@@ -16,16 +18,28 @@ class _InputPageState extends State<InputPage> {
   DateTime today = DateTime.now();
   TextEditingController taskController = TextEditingController();
 
+  late Box<Task> taskBox;
+  late List<Task> tasks;
+
+  @override
+  void initState() {
+    super.initState();
+
+    taskBox = Hive.box<Task>('tasks');
+
+    tasks = taskBox.values.toList();
+  }
+
   @override
   void dispose() {
     super.dispose();
     taskController.dispose();
   }
 
-  List<Task> tasks = [];
 
   @override
   Widget build(BuildContext context) {
+    int completedTasks = tasks.where((task) => task.isDone).length;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -66,7 +80,7 @@ class _InputPageState extends State<InputPage> {
                           ),
                           child: Center(
                             child: Text(
-                              '5/8',
+                              '$completedTasks/${tasks.length}',
                               style: TextStyle(
                                 color: Color(0xFF0B132B),
                                 fontSize: 40.0,
@@ -104,8 +118,11 @@ class _InputPageState extends State<InputPage> {
                   IconButton(
                     icon: Icon(Icons.add_circle, size: 50),
                     onPressed: () {
+                      if (taskController.text.trim().isEmpty) return;
                       setState(() {
-                        tasks.add(Task(title: taskController.text));
+                        Task newTask = Task(title: taskController.text);
+                        tasks.add(newTask);
+                        taskBox.add(newTask);
                         taskController.clear();
                       });
                     },
@@ -123,8 +140,23 @@ class _InputPageState extends State<InputPage> {
             Expanded(child: ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index){
-                  return  TasksList(title: tasks[index].title,
-                  isChecked: tasks[index].isDone);
+                  return  TasksList(
+                    title: tasks[index].title,
+                    isChecked: tasks[index].isDone,
+                    onChanged: (value) {
+                      setState(() {
+                        tasks[index].isDone = value!;
+                        tasks[index].save();
+                      });
+                    },
+                      onDelete: () {
+                        setState(() {
+                          tasks[index].delete();
+
+                          tasks.removeAt(index);
+                        });
+                      },
+                  );
                 })),
           ],
         ),

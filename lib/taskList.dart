@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 
 class TasksList extends StatelessWidget {
-  TasksList({required this.title, required this.isChecked});
-  String title;
-  bool isChecked;
+  const TasksList({
+    super.key,
+    required this.title,
+    required this.isChecked,
+    required this.onChanged,
+    required this.onDelete,
+  });
+
+  final String title;
+  final bool isChecked;
+  final ValueChanged<bool?> onChanged;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +24,15 @@ class TasksList extends StatelessWidget {
       ),
 
       child: ListTile(
-        leading: Checkbox(value: isChecked, onChanged: (value) {}),
+        leading: Checkbox(
+          value: isChecked,
+          onChanged: onChanged,
+        ),
         title: Text(title, style: TextStyle(color: Colors.white)),
-        trailing: Icon(Icons.delete, color: Colors.red),
+        trailing: IconButton(
+          icon: Icon(Icons.delete, color: Colors.red),
+      onPressed: onDelete,
+    ),
       ),
     );
   }
