@@ -3,6 +3,8 @@ import 'package:todoapp/InputPage.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todoapp/task.dart';
+import 'package:provider/provider.dart';
+import 'taskData.dart';
 
 
 
@@ -15,7 +17,9 @@ Future<void> main() async {
 
   await Hive.openBox<Task>('tasks');
 
-  runApp(const TodoApp());
+  runApp(ChangeNotifierProvider(create: (context) => TaskData(),
+     child: const TodoApp())
+      );
 }
 
 class TodoApp extends StatelessWidget {
